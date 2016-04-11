@@ -9,7 +9,7 @@ import requests
 
 # I/O
 def metric_send(metric,  value, tags, timestamp=int(time.time()) ):
-    url = 'http://172.30.235.192:4242/api/put'
+    url = 'http://127.0.0.1:4242/api/put'
     data = {
         "metric": metric,
         "timestamp": timestamp,
@@ -19,10 +19,15 @@ def metric_send(metric,  value, tags, timestamp=int(time.time()) ):
     print(data)
     requests.post(url, data = data)
 
+def count_csv_line(path):
+    with open(path, 'r', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        return len(list(reader))
+
 def read_csv(path):
     with open(path, 'r',encoding="utf-8") as f:
         reader = csv.reader(f)
-        num_row = len(list(reader))
+        num_row = count_csv_line(path)
         i = 0
         for row in reader:
             if i > 1:
@@ -32,7 +37,7 @@ def read_csv(path):
                        timestamp = result[0], \
                        value =  result[1], \
                        tags= {'location':'Klong Luek'})
-               print('%d %' % row*100/num_row)
+               print('%d ' % (i*100/num_row))
             i += 1
 
 def pad_zero_time(string_time):
@@ -69,5 +74,4 @@ if __name__ == '__main__':
         exit()
 
     path = sys.argv[1]
-
     read_csv(path)
