@@ -3,3 +3,4 @@ coverage
 rednose
 watchdog
 potsdb
+requests
