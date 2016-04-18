@@ -6,18 +6,22 @@ import time
 import datetime
 
 import requests
-
+import json
 # I/O
 def metric_send(metric,  value, tags, timestamp=int(time.time()) ):
-    url = 'http://127.0.0.1:4242/api/put'
+    url = 'http://127.0.0.1:4242/api/put?details'
     data = {
         "metric": metric,
         "timestamp": timestamp,
         "value": value,
         "tags":  tags
     }
-    print(data)
-    requests.post(url, data = data)
+    print(json.dumps(data))
+    r = requests.post(url, data = json.dumps(data))
+    if r.status_code != requests.codes.ok:
+        print("Error! " + str(r.status_code))
+        print(r.text)
+        exit(1)
 
 def count_csv_line(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -25,6 +29,7 @@ def count_csv_line(path):
         return len(list(reader))
 
 def read_csv(path):
+    timestamp_old = 0
     with open(path, 'r',encoding="utf-8") as f:
         reader = csv.reader(f)
         num_row = count_csv_line(path)
@@ -32,12 +37,14 @@ def read_csv(path):
         for row in reader:
             if i > 1:
                result = row_convert(row)
-               #  metrics.send('level', result[])
-               metric_send( metric = 'level', \
-                       timestamp = result[0], \
-                       value =  result[1], \
-                       tags= {'location':'Klong Luek'})
-               print('%d ' % (i*100/num_row))
+               if result[0] != timestamp_old:
+                   timestamp_old = result[0]
+                   #  metrics.send('level', result[])
+                   metric_send( metric = 'level', \
+                           timestamp = result[0], \
+                           value =  result[1], \
+                           tags= {'location':'klong_luek'})
+                   print('%d ' % (i*100/num_row))
             i += 1
 
 def pad_zero_time(string_time):
