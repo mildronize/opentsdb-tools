@@ -40,7 +40,7 @@ class ModifiedHandler(PatternMatchingEventHandler):
         pass
 
     def on_modified(self, event):
-        pass
+        when_file_changed(event.src_path)
 
 if __name__ == '__main__':
     args = sys.argv[1:]
