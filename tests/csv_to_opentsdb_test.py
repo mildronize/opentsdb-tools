@@ -1,7 +1,6 @@
 import unittest
 from csv_to_opentsdb import *
 
-
 # Unit
 class PadZeroDateTest(unittest.TestCase):
     def test_date_3_should_03(self):
