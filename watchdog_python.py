@@ -20,7 +20,7 @@ def when_file_changed(filename):
         package = os.path.basename(filename).replace("_test.py", "")
     nose = "nosetests"  # python2
     #  nose = "nosetests3"  # python3
-    options = "--with-coverage --cover-erase " \
+    options = "--rednose --with-coverage --cover-erase " \
         "--cover-package={package} -v {filename}".format(**locals())
     cmd = nose + " " + options
     os.system(cmd)
