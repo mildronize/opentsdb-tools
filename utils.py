@@ -3,6 +3,10 @@ import datetime
 import requests
 import json
 # I/O
+
+NUM_TRY = 5 # times
+TIME_DELAY_BEFORE_TRY_NEW_FLUSH = 5 # seconds
+
 def send_metric(metric,  value, tags, timestamp=int(time.time()) ):
     url = 'http://127.0.0.1:4242/api/put?details'
     data = {
@@ -20,13 +24,24 @@ def send_metric(metric,  value, tags, timestamp=int(time.time()) ):
 
 def send_metrics(data):
     url = 'http://127.0.0.1:4242/api/put?details'
-    r = requests.post(url, data = json.dumps(data))
-    if r.status_code != requests.codes.ok:
-        print("Error! " + str(r.status_code))
-        print(r.text)
-        # print('----- Trace Data ---------')
-        # print(json.dumps(data))
-        exit(1)
+    num_try = 0
+    while num_try < NUM_TRY:
+        try:
+            r = requests.post(url, data = json.dumps(data))
+            if r.status_code != requests.codes.ok:
+                print("Error! " + str(r.status_code))
+                print(r.text)
+                # print('----- Trace Data ---------')
+                # print(json.dumps(data))
+                exit(1)
+            break
+        except OSError as err:
+            print("OS error: {0}".format(err))
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            raise
+        time.sleep(TIME_DELAY_BEFORE_TRY_NEW_FLUSH)
+        num_try += 1
 
 def datetime_string_to_timestamp(datetime_string):
     """input string date -> 13/10/2015 0:45

@@ -16,10 +16,9 @@ from utils import *
 START_TIMESTAMP = datetime_string_to_timestamp("01/01/2000 0:00") # timestamp in second unit
 INTERVAL = 5 # seconds
 
-NUM_TRY = 5 # times
-TIME_DELAY_BEFORE_TRY_NEW_FLUSH = 5 # seconds
 
-NUM_DATA_POINTS_PER_REQUEST = 10 # data points
+
+NUM_DATA_POINTS_PER_REQUEST = 80 # data points ( enabled chucked http request size ( default at 4096 ))
 
 class worker (threading.Thread):
     def __init__(self, threadID, name, start_timestamp, number_data_points):
@@ -37,15 +36,14 @@ class worker (threading.Thread):
         num_looping = math.ceil(self.number_data_points / NUM_DATA_POINTS_PER_REQUEST)
         count_looping = 0
         for i in range(0,self.number_data_points, NUM_DATA_POINTS_PER_REQUEST):
-
             # Packing data points into a list of JSON
             metrics = []
-            # check for last looping
+            # finding the exactly number data points of each loop
             if count_looping + 1 == num_looping and self.number_data_points % NUM_DATA_POINTS_PER_REQUEST != 0:
                 num_data_points_per_request = self.number_data_points % NUM_DATA_POINTS_PER_REQUEST
             else:
                 num_data_points_per_request = NUM_DATA_POINTS_PER_REQUEST
-            print(self.name, count_looping, num_data_points_per_request)
+
             for j in range(num_data_points_per_request):
                 metrics.append({
                     "metric": 'level',
@@ -54,19 +52,8 @@ class worker (threading.Thread):
                     "tags": {'location':'hatyai'}
                 })
                 running_timestamp += INTERVAL
-            num_try = 0
-            while num_try < NUM_TRY:
-                print(self.name + " timestamp: "+ str(running_timestamp) + " " + str(i/self.number_data_points*100)+ " %")
-                try:
-                    send_metrics(metrics)
-                    break
-                except OSError as err:
-                    print("OS error: {0}".format(err))
-                except:
-                    print("Unexpected error:", sys.exc_info()[0])
-                    raise
-                time.sleep(TIME_DELAY_BEFORE_TRY_NEW_FLUSH)
-                num_try += 1
+            print(self.name + " timestamp: "+ str(running_timestamp) + " " + str(i/self.number_data_points*100)+ " %")
+            send_metrics(metrics)
             count_looping += 1
         print("Exiting " + self.name)
 
