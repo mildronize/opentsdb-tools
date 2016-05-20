@@ -11,9 +11,12 @@ import threading
 
 from utils import *
 
-# timestamp in second unit
-START_TIMESTAMP = datetime_string_to_timestamp("01/01/2000 0:00")
+
+START_TIMESTAMP = datetime_string_to_timestamp("01/01/2000 0:00") # timestamp in second unit
 INTERVAL = 5 # seconds
+
+NUM_TRY = 5 # times
+TIME_DELAY_BEFORE_TRY_NEW_FLUSH = 5 # seconds
 
 class worker (threading.Thread):
     def __init__(self, threadID, name, start_timestamp, number_data_points):
@@ -29,13 +32,24 @@ class worker (threading.Thread):
         print("Starting " + self.name)
         running_timestamp = self.start_timestamp
         for i in range(self.number_data_points):
-            print(self.name + " timestamp: "+ str(running_timestamp) + " " + str(i/self.number_data_points*100)+ " %")
-            metric_send(metric='level', \
-                        timestamp = running_timestamp, \
-                        value = value_generator(5000, 6000), \
-                        tags = {'location':'hatyai'}
-            )
-            running_timestamp += INTERVAL
+            num_try = 0
+            while num_try < NUM_TRY:
+                print(self.name + " timestamp: "+ str(running_timestamp) + " " + str(i/self.number_data_points*100)+ " %")
+                try:
+                    metric_send(metric='level', \
+                                timestamp = running_timestamp, \
+                                value = value_generator(5000, 6000), \
+                                tags = {'location':'hatyai'}
+                    )
+                    running_timestamp += INTERVAL
+                    break
+                except OSError as err:
+                    print("OS error: {0}".format(err))
+                except:
+                    print("Unexpected error:", sys.exc_info()[0])
+                    raise
+                time.sleep(TIME_DELAY_BEFORE_TRY_NEW_FLUSH)
+                num_try += 1
         print("Exiting " + self.name)
 
 def value_generator(start, end):
