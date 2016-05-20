@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 
+import math
 import csv
 import time
 import datetime
@@ -18,7 +19,7 @@ INTERVAL = 5 # seconds
 NUM_TRY = 5 # times
 TIME_DELAY_BEFORE_TRY_NEW_FLUSH = 5 # seconds
 
-NUM_DATA_POINTS_PER_REQUEST = 100 # data points
+NUM_DATA_POINTS_PER_REQUEST = 10 # data points
 
 class worker (threading.Thread):
     def __init__(self, threadID, name, start_timestamp, number_data_points):
@@ -33,17 +34,31 @@ class worker (threading.Thread):
     def run(self):
         print("Starting " + self.name)
         running_timestamp = self.start_timestamp
-        for i in range(self.number_data_points):
+        num_looping = math.ceil(self.number_data_points / NUM_DATA_POINTS_PER_REQUEST)
+        count_looping = 0
+        for i in range(0,self.number_data_points, NUM_DATA_POINTS_PER_REQUEST):
+
+            # Packing data points into a list of JSON
+            metrics = []
+            # check for last looping
+            if count_looping + 1 == num_looping and self.number_data_points % NUM_DATA_POINTS_PER_REQUEST != 0:
+                num_data_points_per_request = self.number_data_points % NUM_DATA_POINTS_PER_REQUEST
+            else:
+                num_data_points_per_request = NUM_DATA_POINTS_PER_REQUEST
+            print(self.name, count_looping, num_data_points_per_request)
+            for j in range(num_data_points_per_request):
+                metrics.append({
+                    "metric": 'level',
+                    "timestamp": running_timestamp,
+                    "value": value_generator(5000, 6000),
+                    "tags": {'location':'hatyai'}
+                })
+                running_timestamp += INTERVAL
             num_try = 0
             while num_try < NUM_TRY:
                 print(self.name + " timestamp: "+ str(running_timestamp) + " " + str(i/self.number_data_points*100)+ " %")
                 try:
-                    send_metric(metric='level', \
-                                timestamp = running_timestamp, \
-                                value = value_generator(5000, 6000), \
-                                tags = {'location':'hatyai'}
-                    )
-                    running_timestamp += INTERVAL
+                    send_metrics(metrics)
                     break
                 except OSError as err:
                     print("OS error: {0}".format(err))
@@ -52,6 +67,7 @@ class worker (threading.Thread):
                     raise
                 time.sleep(TIME_DELAY_BEFORE_TRY_NEW_FLUSH)
                 num_try += 1
+            count_looping += 1
         print("Exiting " + self.name)
 
 def value_generator(start, end):
@@ -76,7 +92,7 @@ def flush_data(number_data_points, num_threads):
     scopes = thread_scopes(START_TIMESTAMP, number_data_points, num_threads)
     threads = []
     for i, scope in enumerate(scopes):
-        print("flush ",scope['start'], scope['num'])
+        # print("flush ",scope['start'], scope['num'])
         threads.append(worker(i+1, "Thread " + str(i+1), scope['start'], scope['num']))
         threads[i].start()
 
