@@ -18,6 +18,8 @@ INTERVAL = 5 # seconds
 NUM_TRY = 5 # times
 TIME_DELAY_BEFORE_TRY_NEW_FLUSH = 5 # seconds
 
+NUM_DATA_POINTS_PER_REQUEST = 100 # data points
+
 class worker (threading.Thread):
     def __init__(self, threadID, name, start_timestamp, number_data_points):
         threading.Thread.__init__(self)
@@ -36,7 +38,7 @@ class worker (threading.Thread):
             while num_try < NUM_TRY:
                 print(self.name + " timestamp: "+ str(running_timestamp) + " " + str(i/self.number_data_points*100)+ " %")
                 try:
-                    metric_send(metric='level', \
+                    send_metric(metric='level', \
                                 timestamp = running_timestamp, \
                                 value = value_generator(5000, 6000), \
                                 tags = {'location':'hatyai'}
@@ -86,7 +88,7 @@ def flush_data(number_data_points, num_threads):
 #     running_timestamp = START_TIMESTAMP
 #     for i in range(number_data_points):
 #         print(str(i)+" timestamp: "+ str(running_timestamp) + " " + str(i/number_data_points*100)+ " %")
-#         metric_send(metric='level', \
+#         send_metric(metric='level', \
 #                     timestamp = running_timestamp, \
 #                     value = value_generator(5000, 6000), \
 #                     tags = {'location':'hatyai'}

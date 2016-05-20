@@ -21,7 +21,7 @@ def read_csv(path):
                #  if result[0] != timestamp_old:
                #  timestamp_old = result[0]
                #  metrics.send('level', result[])
-               metric_send( metric = 'level', \
+               send_metric( metric = 'level', \
                        timestamp = result[0], \
                        value =  result[1], \
                        tags= {'location':'klong_luek'})

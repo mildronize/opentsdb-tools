@@ -3,7 +3,7 @@ import datetime
 import requests
 import json
 # I/O
-def metric_send(metric,  value, tags, timestamp=int(time.time()) ):
+def send_metric(metric,  value, tags, timestamp=int(time.time()) ):
     url = 'http://127.0.0.1:4242/api/put?details'
     data = {
         "metric": metric,
