@@ -58,10 +58,27 @@ def thread_scopes(start_timestamp, number_data_points, num_threads):
 
 def flush_data(number_data_points, num_threads):
     scopes = thread_scopes(START_TIMESTAMP, number_data_points, num_threads)
+    threads = []
     for i, scope in enumerate(scopes):
         print("flush ",scope['start'], scope['num'])
-        worker(i+1, "Thread " + str(i+1), scope['start'], scope['num']).start()
+        threads.append(worker(i+1, "Thread " + str(i+1), scope['start'], scope['num']))
+        threads[i].start()
+
+    for thread in threads:
+        thread.join()
     return 0
+
+# def simple_flush_data(number_data_points):
+#     running_timestamp = START_TIMESTAMP
+#     for i in range(number_data_points):
+#         print(str(i)+" timestamp: "+ str(running_timestamp) + " " + str(i/number_data_points*100)+ " %")
+#         metric_send(metric='level', \
+#                     timestamp = running_timestamp, \
+#                     value = value_generator(5000, 6000), \
+#                     tags = {'location':'hatyai'}
+#         )
+#         running_timestamp += INTERVAL
+#     return 0
 
 def printInstruction():
     print("flush_data.py [number_of_data_points] [num_threads]")
@@ -79,4 +96,9 @@ if __name__ == '__main__':
         exit()
 
     number_data_points = int(sys.argv[1])
+    start_time = time.time()
+    # if num_threads == 1:
+    #     simple_flush_data(number_data_points)
+    # else:
     flush_data(number_data_points, num_threads)
+    print("End flushing %s seconds" % (time.time() - start_time))
