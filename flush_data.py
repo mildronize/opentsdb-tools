@@ -2,67 +2,49 @@
 import sys
 
 import math
-import csv
 import time
-import datetime
-
-import random
-
 import threading
 
 from utils import *
+from config import *
 
-
-START_TIMESTAMP = datetime_string_to_timestamp("01/01/2000 0:00") # timestamp in second unit
-INTERVAL = 5 # seconds
-
-
-
-NUM_DATA_POINTS_PER_REQUEST = 80 # data points ( enabled chucked http request size ( default at 4096 ))
+# START_TIMESTAMP = datetime_string_to_timestamp("01/01/2000 0:00") # timestamp in second unit
 
 class worker (threading.Thread):
-    def __init__(self, threadID, name, start_timestamp, number_data_points):
+    def __init__(self, threadID, name, start_timestamp, number_data_points, interval):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
         self.start_timestamp = start_timestamp
         self.number_data_points = number_data_points
-
-        print(start_timestamp, number_data_points)
+        self.interval = interval
 
     def run(self):
-        print("Starting " + self.name)
+        # print("Starting " + self.name)
         running_timestamp = self.start_timestamp
-        num_looping = math.ceil(self.number_data_points / NUM_DATA_POINTS_PER_REQUEST)
         count_looping = 0
-        for i in range(0,self.number_data_points, NUM_DATA_POINTS_PER_REQUEST):
+        for i in range(0,self.number_data_points, MAX_DPPR):
             # Packing data points into a list of JSON
             metrics = []
-            # finding the exactly number data points of each loop
-            if count_looping + 1 == num_looping and self.number_data_points % NUM_DATA_POINTS_PER_REQUEST != 0:
-                num_data_points_per_request = self.number_data_points % NUM_DATA_POINTS_PER_REQUEST
-            else:
-                num_data_points_per_request = NUM_DATA_POINTS_PER_REQUEST
-
-            for j in range(num_data_points_per_request):
-                metrics.append({
-                    "metric": 'level',
-                    "timestamp": running_timestamp,
-                    "value": value_generator(5000, 6000),
-                    "tags": {'location':'hatyai'}
-                })
-                running_timestamp += INTERVAL
-            print(self.name + " timestamp: "+ str(running_timestamp) + " " + str(i/self.number_data_points*100)+ " %")
+            for j in range(find_num_dppr(count_looping, \
+                           self.number_data_points, \
+                           MAX_DPPR)):
+                metrics.append(metric_template(running_timestamp))
+                running_timestamp += self.interval
             send_metrics(metrics)
+            print(self.name + " timestamp: "+ str(running_timestamp) + " " + str(i*100/self.number_data_points)+ " %")
             count_looping += 1
-        print("Exiting " + self.name)
+        # print("Exiting " + self.name)
 
-def value_generator(start, end):
-    return random.randint(start, end)
+def find_num_dppr(count_looping, number_data_points, max_dppr):
+    # finding the exactly number data points of each loop
+    num_looping = math.ceil(number_data_points / max_dppr)
+    if count_looping + 1 == num_looping and number_data_points % max_dppr != 0:
+        return number_data_points % max_dppr
+    return max_dppr
 
-def thread_scopes(start_timestamp, number_data_points, num_threads):
+def calculate_scope_of_each_thread(start_timestamp, number_data_points, num_threads, interval):
     result = []
-    print(start_timestamp)
     for thread_id in range(num_threads):
         number_each_thread = int(number_data_points/num_threads)
 
@@ -71,53 +53,40 @@ def thread_scopes(start_timestamp, number_data_points, num_threads):
         else:
             number_each_thread_tmp = number_each_thread
 
-        starting_timestamp_each_thread = start_timestamp + int(thread_id*INTERVAL*number_each_thread)
+        starting_timestamp_each_thread = start_timestamp + int(thread_id*interval*number_each_thread)
         result.append({'num': number_each_thread_tmp, 'start': starting_timestamp_each_thread})
     return result
 
-def flush_data(number_data_points, num_threads):
-    scopes = thread_scopes(START_TIMESTAMP, number_data_points, num_threads)
+def flush_data(starting_timestamp, number_data_points, interval, num_threads):
+    scopes = calculate_scope_of_each_thread(starting_timestamp, number_data_points, num_threads, interval)
     threads = []
     for i, scope in enumerate(scopes):
-        # print("flush ",scope['start'], scope['num'])
-        threads.append(worker(i+1, "Thread " + str(i+1), scope['start'], scope['num']))
+        threads.append(worker(i+1, "Thread " + str(i+1), scope['start'], scope['num'], interval))
         threads[i].start()
 
     for thread in threads:
         thread.join()
     return 0
 
-# def simple_flush_data(number_data_points):
-#     running_timestamp = START_TIMESTAMP
-#     for i in range(number_data_points):
-#         print(str(i)+" timestamp: "+ str(running_timestamp) + " " + str(i/number_data_points*100)+ " %")
-#         send_metric(metric='level', \
-#                     timestamp = running_timestamp, \
-#                     value = value_generator(5000, 6000), \
-#                     tags = {'location':'hatyai'}
-#         )
-#         running_timestamp += INTERVAL
-#     return 0
-
 def printInstruction():
-    print("flush_data.py [number_of_data_points] [num_threads]")
-    pass
+    print("flush_data.py [starting_timestamp] [number_of_data_points] [interval] [num_threads]")
+    print("Example: flush_data.py 946659600 100000000 5 16")
+    print("[starting_timestamp] in seconds")
+    print("[number_of_data_points] A number of data points")
+    print("[interval] in seconds")
+    print("[num_threads] A number of thread")
 
 if __name__ == '__main__':
     num_threads = 1
-    if len(sys.argv) < 2:
-        printInstruction()
-        exit()
-    elif len(sys.argv) == 3:
-        num_threads = int(sys.argv[2])
-    elif len(sys.argv) > 3:
+    if len(sys.argv) != 5:
         printInstruction()
         exit()
 
-    number_data_points = int(sys.argv[1])
+    starting_timestamp = int(sys.argv[1])
+    number_data_points = int(sys.argv[2])
+    interval           = int(sys.argv[3])
+    num_threads        = int(sys.argv[4])
+
     start_time = time.time()
-    # if num_threads == 1:
-    #     simple_flush_data(number_data_points)
-    # else:
-    flush_data(number_data_points, num_threads)
+    flush_data(starting_timestamp, number_data_points, interval, num_threads)
     print("End flushing %s seconds" % (time.time() - start_time))
