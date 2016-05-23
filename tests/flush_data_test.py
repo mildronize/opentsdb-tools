@@ -71,6 +71,45 @@ class ThreadScopesTest(unittest.TestCase):
         )
 
 
+    def case_3_real_situation_test(self):
+        self.assertEqual(thread_scopes(946659600, 100000000,16), \
+            [
+            {'num':	6250000	, 'start': 	946659600	},
+            {'num':	6250000	, 'start': 	977909600	},
+            {'num':	6250000	, 'start': 	1009159600	},
+            {'num':	6250000	, 'start': 	1040409600	},
+            {'num':	6250000	, 'start': 	1071659600	},
+            {'num':	6250000	, 'start': 	1102909600	},
+            {'num':	6250000	, 'start': 	1134159600	},
+            {'num':	6250000	, 'start': 	1165409600	},
+            {'num':	6250000	, 'start': 	1196659600	},
+            {'num':	6250000	, 'start': 	1227909600	},
+            {'num':	6250000	, 'start': 	1259159600	},
+            {'num':	6250000	, 'start': 	1290409600	},
+            {'num':	6250000	, 'start': 	1321659600	},
+            {'num':	6250000	, 'start': 	1352909600	},
+            {'num':	6250000	, 'start': 	1384159600	},
+            {'num':	6250000	, 'start': 	1415409600	}
+            ])
+
+class FindNumDataPointsPerRequestTest(unittest.TestCase):
+    def find_dppr_1_test(self):
+        self.assertEqual(find_num_dppr(0, 100, 80), 80 )
+        self.assertEqual(find_num_dppr(1, 100, 80), 20 )
+
+    def find_dppr_2_test(self):
+        self.assertEqual(find_num_dppr(0, 240, 80), 80 )
+        self.assertEqual(find_num_dppr(1, 240, 80), 80 )
+        self.assertEqual(find_num_dppr(2, 240, 80), 80 )
+
+    def find_dppr_3_test(self):
+        self.assertEqual(find_num_dppr(0, 250, 80), 80 )
+        self.assertEqual(find_num_dppr(1, 250, 80), 80 )
+        self.assertEqual(find_num_dppr(2, 250, 80), 80 )
+        self.assertEqual(find_num_dppr(3, 250, 80), 10 )
+
+    def find_dppr_4_test(self):
+        self.assertEqual(find_num_dppr(0, 100, 100), 100 )
 
 # Unit
 # class PadZeroDateTest(unittest.TestCase):
