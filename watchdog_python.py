@@ -21,7 +21,8 @@ def when_file_changed(filename):
     nose = "nosetests"  # python2
     #  nose = "nosetests3"  # python3
     options = "--rednose --with-coverage --cover-erase " \
-        "--cover-package={package} -v {filename}".format(**locals())
+        "--cover-package={package} {filename}".format(**locals())
+    # -v verbose show a list of tests
     cmd = nose + " " + options
     os.system(cmd)
 
