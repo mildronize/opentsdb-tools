@@ -9,23 +9,12 @@ from watchdog.events import PatternMatchingEventHandler
 
 def when_file_changed(filename):
     cls()
-    filename = os.path.abspath(filename)
-    print(filename)
-    package = ""
-    if not filename.endswith("_test.py"):
-        basename = os.path.basename(filename).replace(".py", "")
-        package = basename
-        filename = filename.replace(basename, "tests/" + basename + "_test")
-    else:
-        package = os.path.basename(filename).replace("_test.py", "")
-    nose = "nosetests"  # python2
-    #  nose = "nosetests3"  # python3
-    options = "--rednose --cover-erase " \
-        "--cover-package={package} {filename}".format(**locals())
+    nose = "nosetests"
+    options = "--rednose  --with-coverage --cover-erase " \
+        "--cover-package=opentsdb_importer tests".format(**locals())
     # -v verbose show a list of tests
     cmd = nose + " " + options
     os.system(cmd)
-
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')

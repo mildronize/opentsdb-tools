@@ -5,8 +5,8 @@ import math
 import time
 import threading
 
-from utils import *
-from config import *
+from opentsdb_importer.utils import *
+from opentsdb_importer.config import *
 
 # START_TIMESTAMP = datetime_string_to_timestamp("01/01/2000 0:00") # timestamp in second unit
 
@@ -31,7 +31,7 @@ class worker (threading.Thread):
                            MAX_DPPR)):
                 metrics.append(metric_template(running_timestamp))
                 running_timestamp += self.interval
-            send_metrics(metrics)
+            # send_metrics(metrics)
             print(self.name + " timestamp: "+ str(running_timestamp) + " " + str(i*100/self.number_data_points)+ " %")
             count_looping += 1
         # print("Exiting " + self.name)

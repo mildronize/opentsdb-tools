@@ -1,5 +1,5 @@
 import unittest
-from utils import *
+from opentsdb_importer.utils import *
 
 class UtilsTest(unittest.TestCase):
     def datetime_string_to_timestamp_test(self):

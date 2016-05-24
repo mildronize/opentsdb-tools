@@ -5,7 +5,7 @@ import json
 import random
 # I/O
 
-from config import *
+from opentsdb_importer.config import *
 
 def send_metric(metric,  value, tags, timestamp=int(time.time()) ):
     url = 'http://'+SERVER_IP+':'+SERVER_PORT+'/api/put?details'

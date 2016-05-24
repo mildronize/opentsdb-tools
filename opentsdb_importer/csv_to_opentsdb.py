@@ -2,7 +2,7 @@
 import sys
 import csv
 
-from utils import *
+from opentsdb_importer.utils import *
 
 def count_csv_line(path):
     with open(path, 'r', encoding='utf-8') as f:

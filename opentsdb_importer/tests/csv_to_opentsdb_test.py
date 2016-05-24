@@ -1,5 +1,5 @@
 import unittest
-from csv_to_opentsdb import *
+from opentsdb_importer.csv_to_opentsdb import *
 
 # Unit
 class PadZeroDateTest(unittest.TestCase):

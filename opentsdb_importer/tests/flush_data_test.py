@@ -1,6 +1,6 @@
 import unittest
-from flush_data import *
 
+from opentsdb_importer.flush_data import *
 
 class FlushDataTest(unittest.TestCase):
     def flush_data_should_be_0(self):
