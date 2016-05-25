@@ -24,5 +24,6 @@ setup(
     url='',
     license='MIT',
     install_requires=install_requires,
-    packages=find_packages(exclude=('docs'))
+    packages=find_packages(exclude=('docs')),
+    include_package_data=True
 )

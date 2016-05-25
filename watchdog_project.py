@@ -10,8 +10,8 @@ from watchdog.events import PatternMatchingEventHandler
 def when_file_changed(filename):
     cls()
     nose = "nosetests"
-    options = "--rednose  --with-coverage --cover-erase " \
-        "--cover-package=opentsdb_importer tests".format(**locals())
+    options = "--rednose --with-coverage --cover-erase " \
+        "--cover-package=opentsdb_importer opentsdb_importer".format(**locals())
     # -v verbose show a list of tests
     cmd = nose + " " + options
     os.system(cmd)
