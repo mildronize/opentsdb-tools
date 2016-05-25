@@ -6,26 +6,45 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
+UNITEST_DIR = "tests/" # ending with /
 
 def when_file_changed(filename):
-    cls()
-    filename = os.path.abspath(filename)
-    print(filename)
-    package = ""
-    if not filename.endswith("_test.py"):
-        basename = os.path.basename(filename).replace(".py", "")
-        package = basename
-        filename = filename.replace(basename, "tests/" + basename + "_test")
-    else:
-        package = os.path.basename(filename).replace("_test.py", "")
-    nose = "nosetests"  # python2
-    #  nose = "nosetests3"  # python3
-    options = "--rednose --cover-erase " \
-        "--cover-package={package} {filename}".format(**locals())
-    # -v verbose show a list of tests
-    cmd = nose + " " + options
-    os.system(cmd)
 
+    def projectname():
+        """
+            Projectname from name of current directory ('.')
+            if there are dash '-' in its name replace to underscore '_'
+        """
+        return os.path.abspath(".").rsplit("/", 1)[1].replace("-", "_")
+
+    def package(filename):
+        basename = os.path.basename(filename)
+
+        if not basename.endswith("_test.py"):
+            package = filename.replace("./", "").replace(".py", "")
+        else:
+            package = filename.replace( UNITEST_DIR, "").replace(".py", "")
+            print(packages)
+            package = package.replace("_test", "")
+            print(packages)
+
+        package = package.replace("./", "").replace("/", ".")
+        return package
+
+    def test_file(filename):
+        basename = os.path.basename(filename)
+        if not basename.endswith("_test.py"):
+            filename = filename.replace(basename, "")
+            filename += UNITEST_DIR + basename.replace(".py","") + "_test.py"
+        return filename
+
+    cls()
+    print(os.path.abspath(filename))
+    args = {"package": package(filename), "testfile": test_file(filename)}
+    cmd = "nosetests --rednose --with-coverage --cover-erase --cover-package={package}" \
+          " -v {testfile}".format(**args)
+    print(cmd)
+    os.system(cmd)
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
