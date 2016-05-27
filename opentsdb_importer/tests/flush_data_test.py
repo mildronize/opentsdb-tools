@@ -111,11 +111,18 @@ class FindNumDataPointsPerRequestTest(unittest.TestCase):
     def find_dppr_4_test(self):
         self.assertEqual(find_num_dppr(0, 100, 100), 100 )
 
-# Unit
-# class PadZeroDateTest(unittest.TestCase):
-#     def test_date_3_should_03(self):
-#         self.assertEqual( pad_zero_date("3/10/2015"), "03/10/2015")
-#     #  def test_date_03_should_03(self):
-#         #  self.assertEqual( pad_zero_date("03/10/2015"), "03/10/2015")
-#     def test_date_13_should_13(self):
-#         self.assertEqual( pad_zero_date("13/10/2015"), "13/10/2015")
+class ConvertTagsStringToDictTest(unittest.TestCase):
+    def case_length_1_test(self):
+        self.assertEqual(convert_tags_string_to_dict([
+            "location=hatyai"
+        ]), {
+            'location': 'hatyai'
+        })
+
+    # def case_length_2_test(self):
+    #     self.assertEqual(convert_tags_string_to_dict([
+    #         "location=hatyai" , "location=yala"
+    #     ]), {
+    #         'location': 'hatyai',
+    #         'location': 'yala',
+    #     })
