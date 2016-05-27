@@ -7,6 +7,9 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 UNITEST_DIR = "tests/" # ending with /
+# This file for ending with '_test'
+
+# nosetests --rednose --with-coverage --cover-erase --cover-package=opentsdb_importer.flush_data -v ./opentsdb_importer/tests/flush_data_test.py
 
 def when_file_changed(filename):
 
@@ -24,9 +27,7 @@ def when_file_changed(filename):
             package = filename.replace("./", "").replace(".py", "")
         else:
             package = filename.replace( UNITEST_DIR, "").replace(".py", "")
-            print(packages)
             package = package.replace("_test", "")
-            print(packages)
 
         package = package.replace("./", "").replace("/", ".")
         return package

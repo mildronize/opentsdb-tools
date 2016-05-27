@@ -21,11 +21,11 @@ Fix problems
 ./tsdb fsck --full-scan --threads=8 --fix --resolve-duplicates --compact
 ```
 
+Count data
+
+
 
 query
 ```
  time ./tsdb query 946659600 sum level > /dev/null 2>&1
 ```
-
-
-nosetests --rednose --with-coverage --cover-erase --cover-package=opentsdb_importer.flush_data -v ./opentsdb_importer/tests/flush_data_test.py
