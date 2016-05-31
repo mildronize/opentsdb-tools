@@ -6,5 +6,5 @@
 ```
 docker-compose up -d
 docker-compose down
-docker exec -it opentsdbdocker_opentsdb_1 /bin/bash
+docker exec -it opentsdb-alpine-openjdk /bin/bash
 ```

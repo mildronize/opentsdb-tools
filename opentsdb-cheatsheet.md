@@ -22,8 +22,9 @@ Fix problems
 ```
 
 Count data
-
-
+```
+./tsdb scan --import 1999/01/01-00:00:00 sum level | grep 'location=yala' | wc -l
+```
 
 query
 ```
