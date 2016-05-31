@@ -44,6 +44,19 @@ class worker (threading.Thread):
             count_looping += 1
         # print("Exiting " + self.name)
 
+def flush_data(starting_timestamp, number_data_points, interval, num_threads,  start_val, end_val, tags):
+    scopes = calculate_scope_of_each_thread(starting_timestamp, number_data_points, num_threads, interval)
+    threads = []
+    for i, scope in enumerate(scopes):
+        threads.append(worker(i+1, "Thread " + str(i+1), scope['start'], scope['num'], interval,  start_val, end_val, convert_tags_string_to_dict(tags)))
+        threads[i].start()
+
+    for thread in threads:
+        thread.join()
+    return 0
+
+# Utils Functions
+
 def convert_tags_string_to_dict(tags_string):
     result = {}
     tmp = tags_string[0].split('=')
@@ -70,14 +83,3 @@ def calculate_scope_of_each_thread(start_timestamp, number_data_points, num_thre
         starting_timestamp_each_thread = start_timestamp + int(thread_id*interval*number_each_thread)
         result.append({'num': number_each_thread_tmp, 'start': starting_timestamp_each_thread})
     return result
-
-def flush_data(starting_timestamp, number_data_points, interval, num_threads,  start_val, end_val, tags):
-    scopes = calculate_scope_of_each_thread(starting_timestamp, number_data_points, num_threads, interval)
-    threads = []
-    for i, scope in enumerate(scopes):
-        threads.append(worker(i+1, "Thread " + str(i+1), scope['start'], scope['num'], interval,  start_val, end_val, convert_tags_string_to_dict(tags)))
-        threads[i].start()
-
-    for thread in threads:
-        thread.join()
-    return 0
