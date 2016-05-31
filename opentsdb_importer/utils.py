@@ -3,6 +3,7 @@ import datetime
 import requests
 import json
 import random
+import sys
 # I/O
 
 from opentsdb_importer.config import *

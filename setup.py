@@ -14,6 +14,10 @@ install_requires = [
     'watchdog'
 ]
 
+scripts = [
+    'opentsdb_importer/bin/flush_data'
+]
+
 setup(
     name='opentsdb_importer',
     version='0.0.1',
@@ -25,5 +29,6 @@ setup(
     license='MIT',
     install_requires=install_requires,
     packages=find_packages(exclude=('docs')),
-    include_package_data=True
+    include_package_data=True,
+    scripts=scripts
 )

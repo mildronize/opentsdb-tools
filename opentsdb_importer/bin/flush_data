@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+import sys
+import time
+
+from opentsdb_importer.flush_data import flush_data
+
+def printInstruction():
+    print("flush_data.py [starting_timestamp] [number_of_data_points] [interval] [num_threads] [start_val] [end_val] [[tagk1=tagv1] [tagk2=tagv2]... ]")
+    print("Example: flush_data.py 946659600 10000 5 16 5000 6000 location=hatyai")
+    print("[starting_timestamp    ] in seconds")
+    print("[number_of_data_points ] A number of data points")
+    print("[interval              ] in seconds")
+    print("[num_threads           ] A number of thread")
+    print("")
+    print("Scope of data that will bed generated")
+    print("Generate from [start_val] to [end_val]")
+    print("other is tags of that metric Ex. location=hatyai (w/o space)")
+
+if __name__ == '__main__':
+    num_threads = 1
+    if len(sys.argv) < 8:
+        printInstruction()
+        exit()
+
+    starting_timestamp = int(sys.argv[1])
+    number_data_points = int(sys.argv[2])
+    interval           = int(sys.argv[3])
+    num_threads        = int(sys.argv[4])
+    start_val          = int(sys.argv[5])
+    end_val            = int(sys.argv[6])
+
+    tags = []
+    for i in range(7, len(sys.argv)):
+        tags.append(sys.argv[i])
+
+    start_time = time.time()
+    flush_data(starting_timestamp, number_data_points, interval, num_threads, start_val, end_val, tags)
+    print("End flushing %s seconds" % (time.time() - start_time))
