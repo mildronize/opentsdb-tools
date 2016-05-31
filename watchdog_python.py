@@ -6,7 +6,7 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
-UNITEST_DIR = "tests/" # ending with /
+UNITEST_DIR = "tests/unit/" # ending with /
 # This file for ending with '_test'
 
 # nosetests --rednose --with-coverage --cover-erase --cover-package=opentsdb_importer.flush_data -v ./opentsdb_importer/tests/flush_data_test.py
