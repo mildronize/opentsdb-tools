@@ -15,7 +15,8 @@ install_requires = [
 ]
 
 scripts = [
-    'opentsdb_importer/bin/flush_data'
+    'opentsdb_importer/bin/flush_data',
+    'opentsdb_importer/bin/simulate_opentsdb_calc'
 ]
 
 setup(
