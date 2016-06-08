@@ -26,6 +26,7 @@ def send_metric(metric,  value, tags, timestamp=int(time.time()) ):
 def send_metrics(data):
     url = 'http://'+SERVER_IP+':'+SERVER_PORT+'/api/put?details'
     num_try = 0
+    is_give_up = True
     while num_try < NUM_TRY:
         try:
             r = requests.post(url, data = json.dumps(data))
@@ -35,6 +36,7 @@ def send_metrics(data):
                 # print('----- Trace Data ---------')
                 # print(json.dumps(data))
                 exit(1)
+            is_give_up = False
             break
         except OSError as err:
             print("OS error: {0}".format(err))
@@ -43,6 +45,11 @@ def send_metrics(data):
             raise
         time.sleep(TIME_DELAY_BEFORE_TRY_NEW_FLUSH)
         num_try += 1
+    if is_give_up:
+        f = open("/tmp/flush_data_give_up", 'a')
+        f.write(json.dumps(data))
+        f.close()
+
 
 def datetime_string_to_timestamp(datetime_string):
     """input string date -> 13/10/2015 0:45
