@@ -24,6 +24,7 @@ def send_metric(metric,  value, tags, timestamp=int(time.time()) ):
         exit(1)
 
 def send_metrics(data):
+    f = open("/tmp/flush_error", 'a')
     url = 'http://'+SERVER_IP+':'+SERVER_PORT+'/api/put?details'
     num_try = 0
     is_give_up = True
@@ -39,16 +40,17 @@ def send_metrics(data):
             is_give_up = False
             break
         except OSError as err:
-            print("OS error: {0}".format(err))
+            f.write("OS error: {0}".format(err) + "\n")
         except:
-            print("Unexpected error:", sys.exc_info()[0])
+            f.write("Unexpected error:", sys.exc_info()[0] + "\n")
             raise
         time.sleep(TIME_DELAY_BEFORE_TRY_NEW_FLUSH)
         num_try += 1
+    
     if is_give_up:
-        f = open("/tmp/flush_data_give_up", 'a')
-        f.write(json.dumps(data))
-        f.close()
+        exit(1)
+
+    f.close()
 
 
 def datetime_string_to_timestamp(datetime_string):
