@@ -2,9 +2,71 @@ import unittest
 
 from opentsdb_importer.flush_data import *
 
-class FlushDataTest(unittest.TestCase):
-    def flush_data_should_be_0(self):
-        self.assertEqual( flush_data(5), 0)
+class DataGeneratorTest(unittest.TestCase):
+    def dataGenerator_5017_numthreads_16_test(self):
+        assigned_dps = 5017
+        num_threads = 16
+        result_dps = DataGenerator(write_mode = None,
+                                   start_timestamp = 946659600, \
+                                   number_data_points = assigned_dps, \
+                                   interval = 5, \
+                                   num_threads = num_threads, \
+                                   start_val = 5000, \
+                                   end_val = 6000, \
+                                   tags = [
+                                      "location=hatyai"
+                                   ]).run()
+        self.assertEqual(assigned_dps, result_dps)
+    def dataGenerator_5017_numthreads_8_test(self):
+        assigned_dps = 5017
+        num_threads = 16
+        result_dps = DataGenerator(write_mode = None,
+                                   start_timestamp = 946659600, \
+                                   number_data_points = assigned_dps, \
+                                   interval = 5, \
+                                   num_threads = num_threads, \
+                                   start_val = 5000, \
+                                   end_val = 6000, \
+                                   tags = [
+                                      "location=hatyai"
+                                   ]).run()
+        self.assertEqual(assigned_dps, result_dps)
+    def dataGenerator_5017_numthreads_2_test(self):
+        assigned_dps = 5017
+        num_threads = 16
+        result_dps = DataGenerator(write_mode = None,
+                                   start_timestamp = 946659600, \
+                                   number_data_points = assigned_dps, \
+                                   interval = 5, \
+                                   num_threads = num_threads, \
+                                   start_val = 5000, \
+                                   end_val = 6000, \
+                                   tags = [
+                                      "location=hatyai"
+                                   ]).run()
+        self.assertEqual(assigned_dps, result_dps)
+
+# class DataGeneratorWorker(unittest.TestCase):
+#     import queue
+#     def dataGeneratorWorker_597_test(self):
+#         assigned_dps = 597
+#         q = queue.Queue()
+#         worker_configs = {
+#             "start_timestamp": 0,
+#             "number_data_points" : assigned_dps,
+#             "interval": 5,
+#             "start_val": 5000,
+#             "end_val": 6000,
+#             "tags": convert_tags_string_to_dict(["location=hatyai"])
+#         }
+#         threads = DataGeneratorWorker(threadID = 0, \
+#                                       worker_configs = worker_configs, \
+#                                       q = q)
+#         threads.join()
+#         result_dps = int(q.get())
+#         self.assertEqual(assigned_dps, result_dps)
+
+# unit tests
 
 class ThreadScopesTest(unittest.TestCase):
 

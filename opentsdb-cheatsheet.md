@@ -33,3 +33,13 @@ query
 ```
 time ./tsdb query 946659600 sum level > /dev/null 2>&1
 ```
+
+
+import
+```
+docker cp generated-dps opentsdb:/opt/opentsdb/opentsdb-2.2.0 /build
+cd generated-dps
+# create metric first
+../tsdb mkmetric level
+../tsdb import dps-1 dps-2 dps-3 dps-4
+```

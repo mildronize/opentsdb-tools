@@ -2,15 +2,17 @@
 import sys
 import time
 
-from opentsdb_importer.flush_data import flush_data
+# from opentsdb_importer.flush_data import flush_data
+from opentsdb_importer.flush_data import DataGenerator
 
 def printInstruction():
-    print("flush_data.py [starting_timestamp] [number_of_data_points] [interval] [num_threads] [start_val] [end_val] [[tagk1=tagv1] [tagk2=tagv2]... ]")
-    print("Example: flush_data.py 946659600 10000 5 16 5000 6000 location=hatyai")
-    print("[starting_timestamp    ] in seconds")
+    print("flush_data.py [starting_timestamp] [number_of_data_points] [interval] [num_threads] [start_val] [end_val] [write_mode] [[tagk1=tagv1] [tagk2=tagv2]... ]")
+    print("Example: flush_data.py 946659600 10000 5 16 5000 6000 file location=hatyai")
+    print("[start_timestamp       ] in seconds")
     print("[number_of_data_points ] A number of data points")
     print("[interval              ] in seconds")
     print("[num_threads           ] A number of thread")
+    print("[write_mode            ] [opentsdb, file, none]")
     print("")
     print("Scope of data that will bed generated")
     print("Generate from [start_val] to [end_val]")
@@ -18,21 +20,38 @@ def printInstruction():
 
 if __name__ == '__main__':
     num_threads = 1
-    if len(sys.argv) < 8:
+    # from opentsdb_importer.flush_data import DataGenerator
+    # dataGenerator = DataGenerator(number_data_points = 5)
+    # dataGenerator.print_all_args()
+    # exit(0)
+    if len(sys.argv) < 9:
         printInstruction()
         exit()
 
-    starting_timestamp = int(sys.argv[1])
+    start_timestamp = int(sys.argv[1])
     number_data_points = int(sys.argv[2])
     interval           = int(sys.argv[3])
     num_threads        = int(sys.argv[4])
     start_val          = int(sys.argv[5])
     end_val            = int(sys.argv[6])
+    write_mode         = str(sys.argv[7])
+    if write_mode == "none":
+        write_mode = None
 
     tags = []
-    for i in range(7, len(sys.argv)):
+    for i in range(8, len(sys.argv)):
         tags.append(sys.argv[i])
 
     start_time = time.time()
-    flush_data(starting_timestamp, number_data_points, interval, num_threads, start_val, end_val, tags)
+    # flush_data(start_timestamp, number_data_points, interval, num_threads, start_val, end_val, tags)
+    from opentsdb_importer.flush_data import DataGenerator
+    DataGenerator(write_mode = write_mode, \
+                  start_timestamp = start_timestamp, \
+                  number_data_points = number_data_points, \
+                  interval = interval, \
+                  num_threads = num_threads, \
+                  start_val = start_val, \
+                  end_val = end_val, \
+                  tags = tags \
+                  ).run()
     print("End flushing %s seconds" % (time.time() - start_time))
