@@ -53,8 +53,8 @@ class DataGeneratorWorker (threading.Thread):
                 running_timestamp += self.interval
             write_adapter(metrics, self.threadID, self.write_mode)
             total_dps += len(metrics)
-            # print(str(self.threadID) + " timestamp: "+ str(running_timestamp) + " " \
-            #         + str(i*100/self.number_data_points)+ " %")
+            print(str(self.threadID) + " timestamp: "+ str(running_timestamp) + " " \
+                    + str(i*100/self.number_data_points)+ " %")
             count_looping += 1
         self.q.put(total_dps)
         # print("Exiting " + self.threadID)
