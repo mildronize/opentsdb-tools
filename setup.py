@@ -6,6 +6,7 @@ with open('README.md') as f:
     readme = f.read()
 
 install_requires = [
+    'click',
     'requests',
     'nose',
     'coverage',
@@ -16,7 +17,8 @@ install_requires = [
 
 scripts = [
     'opentsdb_importer/bin/flush_data',
-    'opentsdb_importer/bin/simulate_opentsdb_calc'
+    'opentsdb_importer/bin/simulate_opentsdb_calc',
+    'opentsdb_importer/bin/generate_import_shell'
 ]
 
 setup(

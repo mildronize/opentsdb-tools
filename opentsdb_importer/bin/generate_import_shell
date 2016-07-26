@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+import click
+
+@click.command()
+@click.option('--num-files', default=10, help='Number of files')
+@click.option('--sleep', default=0, help='Sleep time in each chunk (seconds)')
+@click.option('--chunk-size', default=1, help='Number of files in each chunk')
+def generate_import_shell(num_files, sleep, chunk_size):
+    prefix = "dps-"
+
+    print("num_files  : %s" % num_files)
+    print("sleep      : %s" % sleep)
+    print("chunk_size : %s" % chunk_size)
+    print("-"*40)
+    for i in range(1,num_files+1, chunk_size):
+        print("../tsdb import", end="")
+        if num_files % chunk_size != 0 and i + chunk_size > num_files:
+            actual_chunk_size = num_files % chunk_size
+        else:
+            actual_chunk_size = chunk_size
+        for chunk_id in range(chunk_size):
+            print( " %s%d" % (prefix, chunk_id + i), end="")
+        print("")
+        print("sleep %d" % sleep)
+
+generate_import_shell()
+
