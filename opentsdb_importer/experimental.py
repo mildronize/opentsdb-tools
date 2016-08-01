@@ -1,67 +1,82 @@
 # To measure stat of OpenTSDB query
 import requests
 import time
+import logging
+logging.basicConfig(level=logging.INFO)
 
-from opentsdb_importer.utils import *
+#  from opentsdb_importer.utils import *
 import opentsdb_importer.config as config
 
 def submit_job(year, downsampling):
     url = "http://"+config.SERVER_IP+":"+config.SERVER_PORT+"/api/query?start=2000/01/01-00:00:00&end=20%02d/01/01-00:00:00&m=sum:%s:level&show_summary=true&show_query=true" % (year, downsampling)
-    print(url)
-    # time.sleep(1)
+    logging.info("HTTP requesting.. "+ url)
     r = requests.get(url)
     if r.status_code != requests.codes.ok:
-        print("Error! " + str(r.status_code))
-        print(r.text)
+        logging.error(r.text)
         exit(1)
     return r.json()
 
-def start_experimental(downsampling):
-    stats = []
-    for year in range(1,3):
-        stats.append({})
-        current_stats_id = len(stats) - 1
-        no_experimental = year
-        start_time = time.time()
-        response = submit_job(year, downsampling)[1]["statsSummary"]
-        stats[current_stats_id]["overall_time"] = time.time() - start_time
-        # measure with this program
-        stats[current_stats_id]["start_time"] = start_time
-        # global
-        stats[current_stats_id]["processingPreWriteTime"] = \
-            response["processingPreWriteTime"]
-        stats[current_stats_id]["emittedDPs"] = response["emittedDPs"]
-        # query queryIdx_00
-        stats[current_stats_id]["aggregationTime"]  = \
-            response["queryIdx_00"]["aggregationTime"]
-        stats[current_stats_id]["serializationTime"] = \
-            response["queryIdx_00"]["serializationTime"]
-        stats[current_stats_id]["queryScanTime"] = \
-            response["queryIdx_00"]["queryScanTime"]
-        stats[current_stats_id]["uidToStringTime"] = \
-            response["queryIdx_00"]["uidToStringTime"]
-        # scanner scannerIdx_00
-        stats[current_stats_id]["compactionTime"] = \
-            response["queryIdx_00"]["scannerStats"]["scannerIdx_00"]["compactionTime"]
-        stats[current_stats_id]["hbaseTime"] = \
-            response["queryIdx_00"]["scannerStats"]["scannerIdx_00"]["hbaseTime"]
-        stats[current_stats_id]["scannerTime"] = \
-            response["queryIdx_00"]["scannerStats"]["scannerIdx_00"]["scannerTime"]
-    write_to_csv_file(stats)
+def measure(year, downsampling):
+    stat = {}
+    #  current_stats_id = len(stats) - 1
+    #  no_experimental = year
+    start_time = time.time()
+    response = submit_job(year, downsampling)[1]["statsSummary"]
+    stat["overall_time"] = (time.time() - start_time) * 1000
+    # measure with this program
+    stat["no"] = year
+    stat["start_time"] = start_time
+    # global
+    stat["processingPreWriteTime"] = \
+        response["processingPreWriteTime"]
+    stat["emittedDPs"] = response["emittedDPs"]
+    # query queryIdx_00
+    stat["aggregationTime"]  = \
+        response["queryIdx_00"]["aggregationTime"]
+    stat["serializationTime"] = \
+        response["queryIdx_00"]["serializationTime"]
+    stat["queryScanTime"] = \
+        response["queryIdx_00"]["queryScanTime"]
+    stat["uidToStringTime"] = \
+        response["queryIdx_00"]["uidToStringTime"]
+    # scanner scannerIdx_00
+    stat["compactionTime"] = \
+        response["queryIdx_00"]["scannerStats"]["scannerIdx_00"]["compactionTime"]
+    stat["hbaseTime"] = \
+        response["queryIdx_00"]["scannerStats"]["scannerIdx_00"]["hbaseTime"]
+    stat["scannerTime"] = \
+        response["queryIdx_00"]["scannerStats"]["scannerIdx_00"]["scannerTime"]
 
-def write_to_csv_file(stats):
-    f = open('stats.csv', 'w')
-    # write header
-    line_output_tmp = 'No'
-    for key, value in stats[0].items():
-        line_output_tmp += ',"'+ str(key) + '"'
-    f.write(line_output_tmp+'\n')
-    # write data
-    for no_experimental, stat in enumerate(stats, start = 1):
-        line_output_tmp = str(no_experimental)
+    return stat
+
+def print_to_csv(stat, output, has_header):
+    with open(output, 'a') as f:
+        # write header
+        if has_header:
+            line_output_tmp = ''
+            for key, value in stat.items():
+                line_output_tmp += ',"'+ str(key) + '"'
+            f.write(line_output_tmp[1:]+'\n')
+        # write data
+        line_output_tmp = ''
         for key, value in stat.items():
             line_output_tmp += ',"'+ str(value) + '"'
-        f.write(line_output_tmp+'\n')
-    pass
+        f.write(line_output_tmp[1:]+'\n')
 
-start_experimental(downsampling = "1y-avg")
+def start_experimental_increment(year_start, year_end, downsampling, output):
+    for year in range(year_start, year_end):
+        stat = measure(year, downsampling)
+
+        has_header = False
+        if year_start == year :
+            has_header = True
+        print_to_csv(stat, output, has_header)
+
+#  def start_experimental_repeat(year_start, year_end, downsampling, output):
+    #  for year in range(year_start, year_end):
+        #  stat = measure(year, downsampling)
+
+        #  has_header = False
+        #  if year_start == year :
+            #  has_header = True
+        #  print_to_csv(stat, output, has_header)
