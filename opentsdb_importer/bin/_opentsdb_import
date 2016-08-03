@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+import click
+import logging
+import subprocess
+
+ENCODING="utf-8"
+CONTAINER_NAME="opentsdb"
+LOG_PATH="./logs"
+# tsdb path in Docker
+TSDB_CLI_PATH="./tsdb"
+# start time when using `tsdb scan`
+START_TIME="2000/01/01-00:00:00"
+
+IMPORT_LOG_PATH="./import_log.csv"
+
+p = subprocess.Popen("", stdout=subprocess.PIPE, shell=True)
+(output, err) = p.communicate()
+
+print ("Today is", output.decode(ENCODING))
+
+#  def
+
+#  def mkmetric(metric_name):
+
