@@ -19,7 +19,6 @@ scripts = [
     'opentsdb_importer/bin/flush_data',
     'opentsdb_importer/bin/simulate_opentsdb_calc',
     'opentsdb_importer/bin/generate_import_shell',
-    'opentsdb_importer/bin/opentsdb_import',
     'opentsdb_importer/bin/experimental_query'
 ]
 
