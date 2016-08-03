@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import click
-from opentsdb_importer.experimental import start_experimental_increment, \
-                                           start_experimental_repeat
-
+import logging
+logging.basicConfig(level=logging.INFO)
+#  from opentsdb_importer.experimental import start_experimental_increment, \
+                                           #  start_experimental_repeat
+from opentsdb_importer.experimental import Experimental
 
 @click.command()
 @click.argument('year_start')
@@ -13,20 +15,43 @@ from opentsdb_importer.experimental import start_experimental_increment, \
 #  @click.option('--downsampling', default="1m-avg", help='Downsampling e.g. `1m-avg`')
 @click.option('--output', default="stats.csv", help='output CSV file path')
 @click.option('--num-repeat', default=0, help='Number of repeating request')
+@click.option('--fake', is_flag=True, help='Show output only, don\'t flush'\
+                                           ' data to server')
 @click.option('--method', default="increment", type=click.Choice(['increment',\
     'repeat']),  help='method for test: ["increment", "repeat"]')
 
-def main_script(year_start, year_end, downsampling, output, method, num_repeat):
+def main_script(year_start, year_end, downsampling, output, method, num_repeat,
+        fake):
     """If use 'repeat' method, you should add --num-repeat"""
-    if method == "increment":
-        start_experimental_increment(year_start = int(year_start), \
-                year_end = int(year_end), \
-                downsampling = downsampling, output = output )
-    elif method == "repeat":
-        start_experimental_repeat(year_start = int(year_start), \
-                year_end = int(year_end), \
-                downsampling = downsampling, \
-                num_repeat = num_repeat, \
-                output = output )
+
+    additional = {
+        "num_repeat": int(num_repeat)
+    }
+    Experimental(
+            year_start = int(year_start),
+            year_end = int(year_end),
+            downsampling = downsampling,
+            output = output,
+            method = method,
+            is_fake = fake,
+            additional = additional
+            ).start()
+
+    #  print(e)
+    #  if e == 2:
+        #  logging.error("Method `repeat` requires `num_repeat` arg")
+    #  elif e != 0 :
+        #  logging.error("Something is going wrong!")
+    #  return e
+    #  if method == "increment":
+        #  start_experimental_increment(year_start = int(year_start), \
+                #  year_end = int(year_end), \
+                #  downsampling = downsampling, output = output )
+    #  elif method == "repeat":
+        #  start_experimental_repeat(year_start = int(year_start), \
+                #  year_end = int(year_end), \
+                #  downsampling = downsampling, \
+                #  num_repeat = num_repeat, \
+                #  output = output )
 
 main_script()

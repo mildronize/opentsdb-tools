@@ -1,22 +1,83 @@
 # To measure stat of OpenTSDB query
 import requests
 import time
-import logging
 import collections
+import logging
 logging.basicConfig(level=logging.INFO)
 
 #  from opentsdb_importer.utils import *
 import opentsdb_importer.config as config
 
+class Experimental(object):
 
-def submit_job(year_start, year_end, downsampling):
-    url = "http://{}:{}/api/query?" \
-        "start=20{:02d}/01/01-00:00:00&end=20{:02d}/01/01-00:00:00" \
-        "&m=sum:{}:level&show_summary=true&show_query=true".format(config.SERVER_IP,
-                                                                   config.SERVER_PORT,
-                                                                   year_start,
-                                                                   year_end,
-                                                                   downsampling)
+    def __init__(self, **kwargs):
+        prop_defaults = {
+                "year_start": 0,
+                "year_end": 1,
+                "downsampling": "1h-avg",
+                "output": "stats.csv",
+                "method": "increment",
+                "is_fake": False,
+                "additional": {}
+        }
+
+        for (prop, default) in prop_defaults.items():
+            setattr(self, prop, kwargs.get(prop, default))
+
+    def start(self):
+        if self.method == "increment":
+            return self.method_increment()
+        elif self.method == "repeat":
+            return self.method_repeat()
+        return 1
+
+    def method_increment(self):
+        for year in range(self.year_start, self.year_end + 1):
+            url = self.generate_url(
+                        year_start = 0,
+                        year_end = year,
+                        downsampling = self.downsampling)
+            if self.is_fake:
+                print("Faking... {}".format(url))
+                continue
+
+            stat = extract_response(url)
+
+            has_header = False
+            if self.year_start == year:
+                has_header = True
+            print_to_csv(stat, self.output, has_header)
+        return 0
+
+    def method_repeat(self):
+        for i in range(self.additional['num_repeat']):
+            url = self.generate_url(
+                        year_start = self.year_start,
+                        year_end = self.year_end,
+                        downsampling = self.downsampling)
+
+            if self.is_fake:
+                print("Faking... {}".format(url))
+                continue
+
+            stat = extract_response(url)
+
+            has_header = False
+            if i == 0:
+                has_header = True
+            print_to_csv(stat, self.output, has_header)
+        return 0
+
+    def generate_url(self, year_start, year_end, downsampling):
+        return "http://{}:{}/api/query?" \
+               "start=20{:02d}/01/01-00:00:00&end=20{:02d}/01/01-00:00:00" \
+               "&m=sum:{}:level&show_summary=true&show_query=true".format(config.SERVER_IP,
+                                                                          config.SERVER_PORT,
+                                                                          year_start,
+                                                                          year_end,
+                                                                          downsampling)
+
+def submit_job(url):
     logging.info("HTTP requesting.. " + url)
     r = requests.get(url)
     if r.status_code != requests.codes.ok:
@@ -27,12 +88,12 @@ def submit_job(year_start, year_end, downsampling):
 #  submit_job(1,2,"1y-avg")
 
 
-def measure(year_start, year_end, downsampling):
+def extract_response(url):
     stat = {}
     #  current_stats_id = len(stats) - 1
     #  no_experimental = year
     start_time = time.time()
-    response = submit_job(year_start, year_end, downsampling)[1]["statsSummary"]
+    response = submit_job(url)[1]["statsSummary"]
     stat["overall_time"] = (time.time() - start_time) * 1000
     # measure with this program
     stat["start_time"] = start_time
@@ -77,26 +138,26 @@ def print_to_csv(stat, output, has_header):
         f.write(line_output_tmp[1:] + '\n')
 
 
-def start_experimental_increment(year_start, year_end, downsampling, output):
-    for year in range(year_start, year_end + 1):
-        stat = measure(0, year, downsampling)
 
-        has_header = False
-        if year_start == year:
-            has_header = True
-        print_to_csv(stat, output, has_header)
+#  def start_experimental_increment(year_start, year_end, downsampling, output):
+    #  for year in range(year_start, year_end + 1):
+        #  stat = extract_response(0, year, downsampling)
 
+        #  has_header = False
+        #  if year_start == year:
+            #  has_header = True
+        #  print_to_csv(stat, output, has_header)
 
-def start_experimental_repeat(
-        year_start,
-        year_end,
-        downsampling,
-        num_repeat,
-        output):
-    for i in range(num_repeat):
-        stat = measure(year_start, year_end, downsampling)
+#  def start_experimental_repeat(
+        #  year_start,
+        #  year_end,
+        #  downsampling,
+        #  num_repeat,
+        #  output):
+    #  for i in range(num_repeat):
+        #  stat = extract_response(year_start, year_end, downsampling)
 
-        has_header = False
-        if i == 0:
-            has_header = True
-        print_to_csv(stat, output, has_header)
+        #  has_header = False
+        #  if i == 0:
+            #  has_header = True
+        #  print_to_csv(stat, output, has_header)
