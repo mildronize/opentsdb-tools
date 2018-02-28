@@ -44,6 +44,6 @@ def generate_import_string(num_files, sleep, chunk_size, tsdb_path ,prefix = "dp
         if not is_last_loop :
             result += os.linesep + "clear" + os.linesep
             result += "echo Finished importing {}{}".format(target_files, os.linesep)
-            result += "sleep_counter %d" % sleep
+            result += "sleep_counter %d" % sleep + os.linesep
     return result
 
